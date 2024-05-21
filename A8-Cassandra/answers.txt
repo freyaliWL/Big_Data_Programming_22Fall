@@ -1,0 +1,23 @@
+1.What happened when you inserted another row with the same primary key as an existing row?
+In the test table, the value of the data is updated when inserting another row with the same primary key as an existing row.
+
+2.What happened when you query a keyspace with replication factor 1 and one node down? How did it behave with replication factor 2 and a node down?
+If query a keyspace with replication factor 1 and one node is down, queries will be invalid.
+If query a keyspace with replication factor 2 and one node is down, queries will work for the data available on the node which is up.
+
+3.How did the consistency level affect the results with the node up/down?
+Taking the replication factor 2 and setting the consistency level to one, queries will work.
+Because we are using one node and the consistency is 1.
+Taking the replication factor 2 and setting the consistency level to ALL, data will not achieve consistency level and queries will be invalid.
+Queries operating on data only available on the node which is up will work.
+
+4.Which of the WHERE id=? values returned successfully with CONSISTENCY ALL when one of the nodes was down? Why do you think some could be returned but not others?
+When the value of id is no less than 2(from 2 to 5), it returned successfully with CONSISTENCY ALL when one of the nodes was down.
+The nodes are up from 2 to 5, but the node 1 is down.
+
+5.What was the CREATE TABLE statement you used for the nasalogs table? What was the primary key you choose, and why?
+CREATE TABLE nasalogs(host TEXT, id TEXT, bytes INT, PRIMARY KEY(host,id));
+I use host and id(UUID field) as the primary key. We can get unique id from generating the uuid.uuid4(). The value of host is not unique, so we should add the id to make the overall primary key unique.
+
+6.What was the CQL query you used (or tried) to get the total number of bytes?
+SELECT sum(bytes) from <userid>.nasalogs
