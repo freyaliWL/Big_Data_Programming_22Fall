@@ -1,0 +1,60 @@
+1.What is your best guess for the slope and intercept of the streaming points being produced?
+When the topic is xy-1:
+	The values of 'slope' and 'intercept' are converging to the optimal, which are 2.769... and -19.7... seperately.
+When the topic is xy-5:
+	The values of 'slope' and 'intercept' are converging to the optimal. which are 2.766... and -19.7... seperately.
+When the topic is xy-10:
+	The values of 'slope' and 'intercept' are converging to the optimal. which are 2.7672... and -20.5... seperately.
+
+Therefore my best guess for the slope and intercept are 2.7672... and -20.5... seperately.
+
+2.Is your streaming program's estimate of the slope and intercept getting better as the program runs? (That is: is the program aggregating all of the data from the start of time, or only those that have arrived since the last output?)
+
+Yes, the changes of values in decimal are becoming smaller, so the slope and intercept getting better as the program runs.
+The program is aggregating all of the data from the start of time.
+
+3.In the colour classification question, what were your validation scores for the RGB and LAB pipelines?
+
+Validation score for RGB model: 0.602086
+Validation score for LAB model: 0.696471
+
+4.When predicting the tmax values, did you over-fit the training data (and for which training/validation sets)?
+
+Yes. The model has over-fitting issue when training on the dataset tmax-1.
+The model performs good on training dataset, but does not get good results on testing dataset.
+When training on tmax-1, r2 and rmse values are:
+r2 =  0.7942745023094031
+rmse =  5.836349317035301
+When testing on tmax-1, r2 and rmse values are:
+r2 = 0.45977457915442477
+rmse = 9.502543512395517
+
+5.What were your testing scores for your model with and without the “yesterday's temperature” feature?
+
+Used tmax-2 for testing
+
+With yesterday_tmax
+r2 =  0.9113943322751948
+rmse =  3.851624137556341
+
+Without yesterday_tmax
+r2 =  0.7834073764747607
+rmse =  5.9135215423129175
+
+6.If you're using a tree-based model, you'll find a .featureImportances property that describes the relative importance of each feature (code commented out in weather_test.py; if not, skip this question). Have a look with and without the “yesterday's temperature” feature: do the results make sense and suggest that your model is making decisions reasonably? With “yesterday's temperature”, is it just predicting “same as yesterday”?
+
+Without yesterday_tmax
+Columns are:
+'day_of_year','latitude','longitude','elevation'
+The corresponding feature importances are:
+(4,[0,1,2,3],[0.41660208060055215,0.3502445267769254,0.12388183186206181,0.10927156076046075])
+
+With yesterday_tmax
+Columns are:
+'day_of_year','latitude','longitude','elevation','yesterday_tmax'
+The corresponding feature importances are:
+(5,[0,1,2,3,4],[0.03649260594213861,0.030966864066371426,0.013845364088097138,0.006159031974198326,0.9125361339291945])
+
+Without yesteryday the highest feature importance was from dayofyear
+With yesterday_tmax the highest feature importance shifted to "yesterday_tmax" indicating that this feature was very important.
+So hence with yesterday_tmax the model behaves better.

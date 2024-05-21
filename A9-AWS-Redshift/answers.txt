@@ -1,0 +1,117 @@
+Q1
+a.
+The average amount of purchases by using the credit card payment is larger than using the debit card.
+People from Ontario tend to put larger purchases on credit card payment. 
+
+b.
+SELECT AVG(purchases.amount), paymentmethods.mtype
+from customers, purchases, paymentmethods
+where (customers.custid = purchases.custid and paymentmethods.pmid = purchases.pmid and customers.custid = paymentmethods.custid and province = 'ON')
+GROUP BY paymentmethods.mtype;
+
+Query results
+
+avg      mtype
+131.40   credit
+101.06	 debit
+
+Q2
+a.
+Visitors from outside BC altogether spent the most per transaction.
+
+b.
+CREATE OR REPLACE VIEW vancouver_custs AS
+WITH 
+  vprefixes (vprefix) AS 
+    (SELECT DISTINCT pcprefix FROM greater_vancouver_prefixes)
+SELECT customers.custid,  
+case when vprefix is not null then 1 else 0 
+end AS in_vancouver
+from customers LEFT OUTER JOIN vprefixes ON SUBSTRING(customers.postalcode,1,3) = vprefix ;
+
+c.
+SELECT From_BC_non_Van, From_Van, count(amount) as Count, AVG(amount), median(amount) as Median 
+from
+(SELECT amount,
+(case when customers.province = 'BC' and in_vancouver = 0 THEN true ELSE false end) AS From_BC_non_Van,
+(case when vancouver_custs.in_vancouver = 1 THEN true ELSE false end) AS From_Van
+FROM purchases 
+JOIN vancouver_custs ON purchases.custid = vancouver_custs.custid
+JOIN customers ON purchases.custid = customers.custid)
+
+group by From_BC_non_Van, From_Van
+order by Median;
+
+Query results:
+
+from_bc_non_van from_van count  avg     median
+false			true	 10384	86.01	27.370
+true			false	 3899	95.16	30.080
+false			false	 15717	112.89	33.270
+
+Q3
+a.
+Tourists spend more at restaurants that serve sushi.
+
+b.
+WITH sushi AS 
+(select amenid from amenities 
+ where tags.cuisine ILIKE '%sushi%'  
+ and  amenity = 'restaurant')
+select avg(purchases.amount),vancouver_custs.in_vancouver 
+from purchases 
+join sushi on purchases.amenid = sushi.amenid
+join vancouver_custs on vancouver_custs.custid = purchases.custid
+
+group by in_vancouver
+order by in_vancouver;
+
+Query results:
+avg     	in_vancouver
+85.80		0
+77.57		1
+
+Q4
+a.
+The average purchase per day for the first five days of August:
+
+pdate       avg
+2021-08-01	96.59
+2021-08-02	106.56
+2021-08-03	95.87
+2021-08-04	115.50
+2021-08-05	95.67
+
+b. 
+select pdate, avg(amount) from purchases
+where datepart(day, pdate)<=5
+group by pdate 
+order by pdate
+
+c.
+Redshift
+bytes= 94.06K
+rows= 4703
+ratio= 94.06KB/4703 = 20bytes
+
+d.
+Spectrum
+bytes= 267396
+rows= 4703
+ratio= 56.86bytes
+
+After S3 filtering and grouping, bytes= 120, rows= 5
+
+e.
+Redshift only scans required columns in a table. It read 9406 bytes of data.
+Spectrum scans the same amount of rows as Redshift but it did not operate on selected columns. It scaned the entire table without filtering, so the total amount data read by Spectrum is 267396 bytes.
+
+f.
+A relatively small or structured dataset or a fully featured data warehouse which can be frequently queried might make it well-suited to loading from S3 into Redshift before filtering it.
+
+g.
+(cite: https://aws.amazon.com/cn/blogs/big-data/amazon-redshift-spectrum-extends-data-warehousing-out-to-exabytes-no-loading-required/)
+
+Loading relatively large datasets which requires maximum performance and using complex analytic queries might make it well-suited to retaining in S3 and querying it using Spectrum. 
+S3 can be used to partition the data by date, time and other custom keys, which contributes to minimize the amount of data processed. The Redshift leverages high-performance by using existing ETL and BI tools, and makes it simple to operate joins, aggregations performed and some other sophisticated query execution.
+
