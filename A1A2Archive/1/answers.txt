@@ -1,0 +1,83 @@
+Name: Wenbin(Freya) Li
+Student ID: 301563887
+
+1.Are there any parts of the original WordCount that still confuse you? If so, what?
+
+ANS:Yes, it's the JAVA parts that confuse me. I am not familiar with the JVM framework and JAVA implementation tools.
+I have noticed that the Assignment2 is also related to JAVA, I hope it will not bring too much frustration to me.
+
+2.How did the output change when you submitted with -D mapreduce.job.reduces=3? 
+Why would this be necessary if your job produced large output sets?
+
+Job Counters 
+                Launched map tasks=3
+                Launched reduce tasks=3
+                Data-local map tasks=2
+                Rack-local map tasks=1
+                Total time spent by all maps in occupied slots (ms)=9830
+                Total time spent by all reduces in occupied slots (ms)=8974
+                Total time spent by all map tasks (ms)=9830
+                Total time spent by all reduce tasks (ms)=8974
+
+The output:
+
+wla202@pmp-gateway:~$ hdfs dfs -ls output-2
+Found 4 items
+-rw-r--r--   2 wla202 supergroup          0 2022-09-14 16:46 output-2/_SUCCESS
+-rw-r--r--   2 wla202 supergroup     106909 2022-09-14 16:46 output-2/part-r-00000
+-rw-r--r--   2 wla202 supergroup     106932 2022-09-14 16:46 output-2/part-r-00001
+-rw-r--r--   2 wla202 supergroup     105712 2022-09-14 16:46 output-2/part-r-00002
+
+wla202@pmp-gateway:~$ hdfs dfs -cat output-2/part-r-00000 | grep -i "^better"
+better  255
+better,"        2
+better. 23
+better.--Now    1
+better: 1
+
+ANS: Three reduce tasks means three reducers worked in parallel, and we can see the the output with different 'part-r'.
+Words share a key were combined to smaller sets.
+If a job produced large output sets, this would be necessary because it could reduce the workload for MapReduce Framework.
+If we set only one reducer, the work of it would be too big. In a Distributed system, it is necessary and beneficial to set work in parallel and promote efficiency.
+
+3.How was the -D mapreduce.job.reduces=0 output different?
+
+Job Counters 
+                Launched map tasks=3
+                Data-local map tasks=3
+                Total time spent by all maps in occupied slots (ms)=11010
+                Total time spent by all reduces in occupied slots (ms)=0
+                Total time spent by all map tasks (ms)=11010
+
+wla202@pmp-gateway:~$ hdfs dfs -cat output-3/part-r-00000
+cat: `output-3/part-r-00000': No such file or directory
+wla202@pmp-gateway:~$ hdfs dfs -ls output-3
+Found 4 items
+-rw-r--r--   2 wla202 supergroup          0 2022-09-14 22:24 output-3/_SUCCESS
+-rw-r--r--   2 wla202 supergroup    1197116 2022-09-14 22:24 output-3/part-m-00000
+-rw-r--r--   2 wla202 supergroup     905534 2022-09-14 22:24 output-3/part-m-00001
+-rw-r--r--   2 wla202 supergroup     629947 2022-09-14 22:24 output-3/part-m-00002
+
+wla202@pmp-gateway:~$ hdfs dfs -cat output-3/part-m-00000 | grep -i "^better"
+better  1
+better  1
+better  1
+...
+better, 1
+better--grown   1
+better. 1
+better; 1
+better, 1
+Better  1
+better  1
+...
+
+ANS:We can see three 'part-m' in output-3, which means no reducer was used. 
+When using the command line 'hdfs dfs-ls output-3/part-r-00000' to check the output, the output was presented separately.
+Words share a key were not combined to a smaller set.
+
+
+4.Was there any noticeable difference in the running time of your RedditAverage with and without the combiner optimization?
+ANS:No, there is not any noticeable difference.
+With the combiner optimization, it took less time. The combiner reduced the work of the reducer.
+

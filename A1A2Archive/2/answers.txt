@@ -1,0 +1,25 @@
+1.In the WikipediaPopular class, it would be much more interesting to find the page that is most popular, not just the view count (as we did with Spark). What would be necessary to modify your class to do this?
+(You don't have to actually implement it.)
+
+ANS: With JAVA, I would return output in pairs for showing the most popular pages. 
+We have the LongPairWritable Class, so I can write with the context.write(Key, Value) for a tuple structure output, instead of int.
+
+2.An RDD has many methods: it can do many more useful tricks than were at hand with MapReduce. Write a sentence or two to explain the difference between .map and .flatMap. Which is more like the MapReduce concept of mapping?
+
+ANS: .map() transformation applies a function to each row in a DataFrame/Dataset and returns the new transformed Dataset. So the number of outputs is the same as inputs.
+.flatMap() is similar to map(), but each input item can be mapped to 0 or more output items. When the input is multi-dimensional, the .flatMap() can return a sequence of one dimensional output.
+.flatMap() can return a list of items whereas .map() can only returns one item, I think .flatMap() is more like a MapReduce concept of mapping.
+
+3.Do the same for .reduce and .reduceByKey. Which is more like the MapReduce concept of reducing?
+
+ANS: .reduce() must pull the entire dataset down into a single location because it is reducing to one final value. 
+On the other hand, .reduceByKey() is one value for each key. This action first can be run on each machine, then it can remain an RDD and have further transformations done on its dataset.
+I think .reduceByKey() is more like a reducer in MapReduce.
+
+4.When finding popular Wikipedia pages, the maximum number of page views is certainly unique, but the most popular page might be a tie. 
+What would your improved Python implementation do if there were two pages with the same highest number of page views in an hour? 
+What would be necessary to make your code find all of the pages views the maximum number of times? (Again, you don't have to actually implement this.)
+
+ANS: I will find the value of the highest page views (in an hour) firstly, then enumerate again to get all pages that has this highest page views and this is the answer. 
+The later operation can be done with writing a filter() function.
+
