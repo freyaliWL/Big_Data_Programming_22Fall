@@ -1,0 +1,39 @@
+1.How much of a difference did the .cache() make in your Reddit ETL code?
+I used reddit-3 locally.
+
+with .cache()
+real    0m23.676s
+user    0m48.422s
+sys     0m12.438s
+
+without .cache()
+real    0m25.059s
+user    0m44.938s
+sys     0m12.328s
+On my local PC, the running time with using the .cache() is a little less than without. 
+I used reddit-4 on the cluster
+with .cache()
+real    0m42.736s
+user    0m28.173s
+sys     0m2.462s
+
+without .cache()
+real    0m52.146s
+user    0m26.686s
+sys     0m2.911s
+On the cluster, when using the reddit-4, the running time is much less with the .cache() than without.
+
+
+2.When would .cache() make code slower than without?
+When a large dataset is stored in cache and rarely being used again, the .cache() is not helpful.
+Because it will take more time to store the data in the memory with .cache(), so in this case, the total running time will be extended compared to without using .cache().
+
+3.Under what conditions will the broadcast join be faster than an actual join?
+When a dataset is relatively small and it has been sent to each executor, the broadcast join will be faster than an actual join.
+After broadcasting this dataset, accessing any executor for this dataset will cost smaller running time than joining this dataset actually.
+It will be easier for the processor to get the elements from this dataset with a broadcast join.
+
+4.When will the broadcast join be slower?
+When a dataset is relatively large for a broadcast, this join operation will be slower.
+The processor will extend its running time to copy a large dataset for executors, so it may be considered an unnecessary operation to do a broadcast join.
+When the dataset is large and the broadcast join is used, the running time will cost too much because there will be a huge workload.
